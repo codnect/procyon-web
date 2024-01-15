@@ -1,6 +1,6 @@
 package mvc
 
-import "codnect.io/procyon/web/http"
+import "codnect.io/procyon-web/http"
 
 type requestHandler[T, E any] struct {
 	fn Function[T, E]

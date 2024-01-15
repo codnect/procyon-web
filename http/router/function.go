@@ -1,8 +1,8 @@
 package router
 
 import (
-	"codnect.io/procyon/web/http"
-	"codnect.io/procyon/web/http/middleware"
+	"codnect.io/procyon-web/http"
+	"codnect.io/procyon-web/http/middleware"
 )
 
 type Function struct {

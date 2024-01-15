@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"codnect.io/procyon/web/http"
+	"codnect.io/procyon-web/http"
 	"reflect"
 )
 
