@@ -1,4 +1,4 @@
-package web
+package server
 
 import (
 	"codnect.io/procyon-web/http"
@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type ServerContext struct {
-	parent   *ServerContext
+type Context struct {
+	parent   *Context
 	context  context.Context
-	request  ServerRequest
-	response ServerResponse
+	request  Request
+	response Response
 
 	HandlerChain     http.HandlerChain
 	nextHandlerIndex int
@@ -20,18 +20,18 @@ type ServerContext struct {
 	completed bool
 	aborted   bool
 
-	delegate      ServerContextDelegate
+	delegate      ContextDelegate
 	pathVariables http.PathVariables
 }
 
-func newServerContext() *ServerContext {
-	return &ServerContext{
+func newServerContext() *Context {
+	return &Context{
 		pathVariables: http.PathVariables{},
 	}
 }
 
-func (c *ServerContext) WithValue(key, val any) http.Context {
-	copyContext := new(ServerContext)
+func (c *Context) WithValue(key, val any) http.Context {
+	copyContext := new(Context)
 	*copyContext = *c
 
 	ctx := c.context
@@ -43,7 +43,7 @@ func (c *ServerContext) WithValue(key, val any) http.Context {
 	return copyContext
 }
 
-func (c *ServerContext) With(request http.Request, response http.Response) http.Context {
+func (c *Context) With(request http.Request, response http.Response) http.Context {
 	if request == nil {
 		panic("nil request")
 	}
@@ -52,10 +52,10 @@ func (c *ServerContext) With(request http.Request, response http.Response) http.
 		panic("nil response")
 	}
 
-	copyContext := new(ServerContext)
+	copyContext := new(Context)
 	*copyContext = *c
-	copyContext.request = *(request.(*ServerRequest))
-	copyContext.response = *(response.(*ServerResponse))
+	copyContext.request = *(request.(*Request))
+	copyContext.response = *(response.(*Response))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -64,14 +64,14 @@ func (c *ServerContext) With(request http.Request, response http.Response) http.
 	return copyContext
 }
 
-func (c *ServerContext) WithRequest(request http.Request) http.Context {
+func (c *Context) WithRequest(request http.Request) http.Context {
 	if request == nil {
 		panic("nil request")
 	}
 
-	copyContext := new(ServerContext)
+	copyContext := new(Context)
 	*copyContext = *c
-	copyContext.request = *(request.(*ServerRequest))
+	copyContext.request = *(request.(*Request))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -80,14 +80,14 @@ func (c *ServerContext) WithRequest(request http.Request) http.Context {
 	return copyContext
 }
 
-func (c *ServerContext) WithResponse(response http.Response) http.Context {
+func (c *Context) WithResponse(response http.Response) http.Context {
 	if response == nil {
 		panic("nil response")
 	}
 
-	copyContext := new(ServerContext)
+	copyContext := new(Context)
 	*copyContext = *c
-	copyContext.response = *(response.(*ServerResponse))
+	copyContext.response = *(response.(*Response))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -96,15 +96,15 @@ func (c *ServerContext) WithResponse(response http.Response) http.Context {
 	return copyContext
 }
 
-func (c *ServerContext) Deadline() (deadline time.Time, ok bool) {
+func (c *Context) Deadline() (deadline time.Time, ok bool) {
 	return
 }
 
-func (c *ServerContext) Done() <-chan struct{} {
+func (c *Context) Done() <-chan struct{} {
 	return nil
 }
 
-func (c *ServerContext) setErr(err error) {
+func (c *Context) setErr(err error) {
 	if c.parent != nil {
 		c.parent.setErr(err)
 	} else {
@@ -112,7 +112,7 @@ func (c *ServerContext) setErr(err error) {
 	}
 }
 
-func (c *ServerContext) Err() error {
+func (c *Context) Err() error {
 	if c.parent != nil {
 		return c.parent.Err()
 	}
@@ -120,7 +120,7 @@ func (c *ServerContext) Err() error {
 	return c.err
 }
 
-func (c *ServerContext) Value(key any) any {
+func (c *Context) Value(key any) any {
 	if key == http.PathVariablesAttribute {
 		return &c.pathVariables
 	}
@@ -132,11 +132,11 @@ func (c *ServerContext) Value(key any) any {
 	return c.context.Value(key)
 }
 
-func (c *ServerContext) Parent() *ServerContext {
+func (c *Context) Parent() *Context {
 	return c.parent
 }
 
-func (c *ServerContext) complete() {
+func (c *Context) complete() {
 	if c.parent != nil {
 		c.parent.complete()
 	} else {
@@ -144,7 +144,7 @@ func (c *ServerContext) complete() {
 	}
 }
 
-func (c *ServerContext) IsCompleted() bool {
+func (c *Context) IsCompleted() bool {
 	if c.parent != nil {
 		return c.parent.IsCompleted()
 	}
@@ -152,7 +152,7 @@ func (c *ServerContext) IsCompleted() bool {
 	return c.completed
 }
 
-func (c *ServerContext) Abort() {
+func (c *Context) Abort() {
 	if c.parent != nil {
 		c.parent.Abort()
 	} else {
@@ -160,7 +160,7 @@ func (c *ServerContext) Abort() {
 	}
 }
 
-func (c *ServerContext) IsAborted() bool {
+func (c *Context) IsAborted() bool {
 	if c.parent != nil {
 		return c.parent.IsAborted()
 	}
@@ -168,15 +168,15 @@ func (c *ServerContext) IsAborted() bool {
 	return c.aborted
 }
 
-func (c *ServerContext) Request() http.Request {
+func (c *Context) Request() http.Request {
 	return &c.request
 }
 
-func (c *ServerContext) Response() http.Response {
+func (c *Context) Response() http.Response {
 	return &c.response
 }
 
-func (c *ServerContext) Reset(req *stdhttp.Request, writer stdhttp.ResponseWriter) {
+func (c *Context) Reset(req *stdhttp.Request, writer stdhttp.ResponseWriter) {
 	/*if !c.IsCompleted() {
 		return
 	}*/
@@ -195,7 +195,7 @@ func (c *ServerContext) Reset(req *stdhttp.Request, writer stdhttp.ResponseWrite
 	//c.pathVariables.currentIndex = 0
 }
 
-func (c *ServerContext) nextHandler() int {
+func (c *Context) nextHandler() int {
 	if c.parent != nil {
 		return c.parent.nextHandler()
 	}
@@ -203,7 +203,7 @@ func (c *ServerContext) nextHandler() int {
 	return c.nextHandlerIndex
 }
 
-func (c *ServerContext) setNextHandler(nextHandler int) {
+func (c *Context) setNextHandler(nextHandler int) {
 	if c.parent != nil {
 		c.parent.setNextHandler(nextHandler)
 	} else {
@@ -211,7 +211,7 @@ func (c *ServerContext) setNextHandler(nextHandler int) {
 	}
 }
 
-func (c *ServerContext) Invoke(ctx http.Context) {
+func (c *Context) Invoke(ctx http.Context) {
 	if len(c.HandlerChain) == 0 {
 		return
 	}

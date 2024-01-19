@@ -1,11 +1,11 @@
-package web
+package server
 
-type ServerStartStopLifecycle struct {
+type StartStopLifecycle struct {
 	server  Server
 	running bool
 }
 
-func (l *ServerStartStopLifecycle) Start() error {
+func (l *StartStopLifecycle) Start() error {
 	err := l.server.Start()
 
 	if err != nil {
@@ -16,7 +16,7 @@ func (l *ServerStartStopLifecycle) Start() error {
 	return nil
 }
 
-func (l *ServerStartStopLifecycle) Stop() error {
+func (l *StartStopLifecycle) Stop() error {
 	err := l.server.Stop()
 
 	if err != nil {
@@ -27,6 +27,6 @@ func (l *ServerStartStopLifecycle) Stop() error {
 	return nil
 }
 
-func (l *ServerStartStopLifecycle) IsRunning() bool {
+func (l *StartStopLifecycle) IsRunning() bool {
 	return l.running
 }

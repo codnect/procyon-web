@@ -1,7 +1,6 @@
-package web
+package server
 
 import (
-	"codnect.io/procyon-core/env/property"
 	"codnect.io/procyon-web/http"
 	"codnect.io/procyon-web/http/router"
 	"context"
@@ -11,21 +10,8 @@ import (
 	"sync"
 )
 
-type Server interface {
-	Start() error
-	Stop() error
-	Port() int
-	ShutDownGracefully(ctx context.Context) error
-}
-
-type ServerProperties struct {
-	property.Properties `prefix:"server"`
-
-	Port int `prop:"port" default:"8080"`
-}
-
-type DefaultServer struct {
-	props  ServerProperties
+type Server struct {
+	props  http.ServerProperties
 	server *stdhttp.Server
 
 	contextPool sync.Pool
@@ -34,8 +20,8 @@ type DefaultServer struct {
 	errorHandler    http.ErrorHandler
 }
 
-func NewDefaultServer() *DefaultServer {
-	return &DefaultServer{
+func New() *Server {
+	return &Server{
 		contextPool: sync.Pool{
 			New: func() any {
 				return newServerContext()
@@ -44,7 +30,7 @@ func NewDefaultServer() *DefaultServer {
 	}
 }
 
-func (s *DefaultServer) Start() error {
+func (s *Server) Start() error {
 	s.server = &stdhttp.Server{
 		Addr:    fmt.Sprintf(":%d", s.props.Port),
 		Handler: s,
@@ -53,15 +39,15 @@ func (s *DefaultServer) Start() error {
 	return nil
 }
 
-func (s *DefaultServer) Stop() error {
+func (s *Server) Stop() error {
 	return s.server.Shutdown(context.Background())
 }
 
-func (s *DefaultServer) Port() int {
+func (s *Server) Port() int {
 	return s.props.Port
 }
 
-func (s *DefaultServer) ShutDownGracefully(ctx context.Context) error {
+func (s *Server) ShutDownGracefully(ctx context.Context) error {
 	if err := s.server.Shutdown(ctx); err != nil {
 		return err
 	}
@@ -69,8 +55,8 @@ func (s *DefaultServer) ShutDownGracefully(ctx context.Context) error {
 	return nil
 }
 
-func (s *DefaultServer) ServeHTTP(writer stdhttp.ResponseWriter, request *stdhttp.Request) {
-	ctx := s.contextPool.Get().(*ServerContext)
+func (s *Server) ServeHTTP(writer stdhttp.ResponseWriter, request *stdhttp.Request) {
+	ctx := s.contextPool.Get().(*Context)
 	ctx.Reset(request, writer)
 
 	defer func() {
@@ -96,7 +82,7 @@ func (s *DefaultServer) ServeHTTP(writer stdhttp.ResponseWriter, request *stdhtt
 	s.contextPool.Put(ctx)
 }
 
-func (s *DefaultServer) handlerRuntimeError(ctx http.Context, runtimeError any) {
+func (s *Server) handlerRuntimeError(ctx http.Context, runtimeError any) {
 	switch err := runtimeError.(type) {
 	case error:
 		s.errorHandler.HandleError(ctx, err)
