@@ -4,10 +4,10 @@ import (
 	"codnect.io/procyon-web/http"
 )
 
-type ContextDelegate struct {
+type RequestDelegate struct {
 	ctx *Context
 }
 
-func (d ContextDelegate) Invoke(ctx http.Context) {
+func (d RequestDelegate) Invoke(ctx http.Context) {
 	d.ctx.Invoke(ctx)
 }

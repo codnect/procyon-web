@@ -20,7 +20,7 @@ type Context struct {
 	completed bool
 	aborted   bool
 
-	delegate      ContextDelegate
+	delegate      RequestDelegate
 	pathVariables http.PathVariables
 }
 
