@@ -1,6 +1,7 @@
 package web
 
 import (
+	"codnect.io/procyon-core/env/property"
 	"codnect.io/procyon-web/http"
 	"codnect.io/procyon-web/http/router"
 	"context"
@@ -18,7 +19,8 @@ type Server interface {
 }
 
 type ServerProperties struct {
-	//property.Properties `prefix:"server"`
+	property.Properties `prefix:"server"`
+
 	Port int `prop:"port" default:"8080"`
 }
 
