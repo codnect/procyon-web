@@ -1,6 +1,7 @@
 package server
 
 import (
+	"codnect.io/logy"
 	"codnect.io/procyon-web/http"
 	"codnect.io/procyon-web/http/router"
 	"context"
@@ -8,6 +9,10 @@ import (
 	"fmt"
 	stdhttp "net/http"
 	"sync"
+)
+
+var (
+	log = logy.Get()
 )
 
 type Server struct {
@@ -27,6 +32,9 @@ func New() *Server {
 				return newServerContext()
 			},
 		},
+		props: http.ServerProperties{
+			Port: 8080,
+		},
 	}
 }
 
@@ -36,23 +44,25 @@ func (s *Server) Start() error {
 		Handler: s,
 	}
 
+	go func() {
+		if err := s.server.ListenAndServe(); err != nil {
+			log.Info("Server started on port(s): {} (http)", s.props.Port)
+		}
+	}()
+
 	return nil
 }
 
-func (s *Server) Stop() error {
-	return s.server.Shutdown(context.Background())
-}
-
-func (s *Server) Port() int {
-	return s.props.Port
-}
-
-func (s *Server) ShutDownGracefully(ctx context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if err := s.server.Shutdown(ctx); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *Server) Port() int {
+	return s.props.Port
 }
 
 func (s *Server) ServeHTTP(writer stdhttp.ResponseWriter, request *stdhttp.Request) {
