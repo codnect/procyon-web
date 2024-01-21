@@ -1,4 +1,4 @@
-package procyon_web
+package web
 
 import (
 	"codnect.io/procyon-web/http"

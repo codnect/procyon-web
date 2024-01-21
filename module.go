@@ -1,4 +1,4 @@
-package procyon_web
+package web
 
 import (
 	"codnect.io/procyon-core/component"
@@ -8,7 +8,7 @@ import (
 type Module struct {
 }
 
-func (m *Module) InitModule() {
+func (m Module) InitModule() {
 	component.Register(server.New, component.Name("defaultWebServer"))
 	component.Register(newServerLifecycle, component.Name("httpServerLifecycle"))
 }
