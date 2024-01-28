@@ -1,7 +1,7 @@
 package http
 
 import (
-	"codnect.io/procyon-core/env/property"
+	"codnect.io/procyon-core/runtime/env/property"
 	"context"
 )
 

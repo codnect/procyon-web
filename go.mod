@@ -3,7 +3,7 @@ module codnect.io/procyon-web
 go 1.19
 
 require (
-	codnect.io/procyon-core v0.0.2-dev
+	codnect.io/procyon-core v0.0.3-dev
 )
 
 require (
