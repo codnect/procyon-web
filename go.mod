@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	codnect.io/logy v1.0.2
-	codnect.io/procyon-core v0.0.6-dev
+	codnect.io/procyon-core v0.0.7-dev
 )
 
 require (
