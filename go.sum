@@ -2,6 +2,8 @@ codnect.io/logy v1.0.2 h1:KT1RG+4YENvYeok3beCY7vHrosXwlDOkHXQ477XgnI4=
 codnect.io/logy v1.0.2/go.mod h1:WPB9LK1/S2sblgj/qqlJ+OKSxU4aDhl1zE3+/8GMWe4=
 codnect.io/procyon-core v0.0.4-dev h1:1KWfgHWYgN7KSil+9cwCMrVlOq68DEbxJN1K1s1s+7o=
 codnect.io/procyon-core v0.0.4-dev/go.mod h1:BpYfbuzZuLEQgDAbV/N4NtnZjsfM1Sfwqfh/ivMhwoE=
+codnect.io/procyon-core v0.0.5-dev h1:fFr0+gzpb/WtRXZE7vIBQKKg+qn/wAYlbD5Lar+drcI=
+codnect.io/procyon-core v0.0.5-dev/go.mod h1:BpYfbuzZuLEQgDAbV/N4NtnZjsfM1Sfwqfh/ivMhwoE=
 codnect.io/reflector v0.0.13-dev h1:hYCDBGVZcJev1PZ11kGOnJcQaCBw1gH9fycXpjS8Hak=
 codnect.io/reflector v0.0.13-dev/go.mod h1:Ttdo+IMvo0WFY/BATxL86LdBDqCBOh2mO3Tb7I0bykY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -13,6 +15,8 @@ github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJu
 golang.org/x/exp v0.0.0-20220909182711-5c715a9e8561 h1:MDc5xs78ZrZr3HMQugiXOAkSZtfTpbJLDr/lwfgO53E=
 golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.16.0 h1:xWw16ngr6ZMtmxDyKyIgsE93KNKz5HKmMa3b8ALHidU=
+golang.org/x/sys v0.16.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
