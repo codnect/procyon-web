@@ -12,7 +12,7 @@ type Mapping struct {
 	attributes   map[string]any
 }
 
-func NewMapping(pattern string, opts ...MappingOption) *Mapping {
+func NewMapping(pattern string, opts ...MappingOption) Mapping {
 	mapping := &Mapping{
 		pattern: pattern,
 	}
@@ -21,32 +21,38 @@ func NewMapping(pattern string, opts ...MappingOption) *Mapping {
 		option(mapping)
 	}
 
-	return mapping
+	if len(mapping.methods) == 0 {
+		mapping.methods = []http.Method{
+			http.MethodGet,
+		}
+	}
+
+	return *mapping
 }
 
-func (r *Mapping) Pattern() string {
+func (r Mapping) Pattern() string {
 	return r.pattern
 }
 
-func (r *Mapping) Methods() []http.Method {
+func (r Mapping) Methods() []http.Method {
 	methods := make([]http.Method, 0)
 	methods = append(methods, r.methods...)
 	return methods
 }
 
-func (r *Mapping) Accepts() []string {
+func (r Mapping) Accepts() []string {
 	accepts := make([]string, 0)
 	accepts = append(accepts, r.accepts...)
 	return accepts
 }
 
-func (r *Mapping) ContentTypes() []string {
+func (r Mapping) ContentTypes() []string {
 	contentTypes := make([]string, 0)
 	contentTypes = append(contentTypes, r.contentTypes...)
 	return contentTypes
 }
 
-func (r *Mapping) Attributes() map[string]any {
+func (r Mapping) Attributes() map[string]any {
 	attributes := make(map[string]any)
 
 	for k, v := range r.attributes {

@@ -31,76 +31,78 @@ func (r *MappingRegistry) Unregister(mapping *Mapping) {
 
 }
 
-/*
-func NewSimpleHandlerRegistry() *SimpleHandlerRegistry {
-	mapping := &SimpleHandlerRegistry{
-		routes: make([]*tree, 9),
-	}
-
-	mapping.createMappingTree(MethodGet)
-	mapping.createMappingTree(MethodHead)
-	mapping.createMappingTree(MethodPost)
-	mapping.createMappingTree(MethodPut)
-	mapping.createMappingTree(MethodPatch)
-	mapping.createMappingTree(MethodDelete)
-	mapping.createMappingTree(MethodConnect)
-	mapping.createMappingTree(MethodOptions)
-	mapping.createMappingTree(MethodTrace)
-	return mapping
+type Registry interface {
+	Handler(ctx http.Context) (http.HandlerChain, bool)
+	Register(mapping Mapping, handler http.Handler) error
+	Unregister(mapping Mapping)
 }
 
-func (hm *SimpleHandlerRegistry) createMappingTree(method Method) {
-	mappingTree := &tree{}
-	hm.routes[method.IntValue()] = mappingTree
+type SimpleRegistry struct {
+	tree []*routingTree
 }
 
-func (hm *SimpleHandlerRegistry) GetHandler(ctx *Context) *HandlerChain {
-	request := ctx.Request()
-	path := request.Path()
-	method := request.Method()
-	mappingTree := hm.routes[method.IntValue()]
-
-	if mappingTree == nil {
-		return nil
+func NewSimpleRegistry() *SimpleRegistry {
+	registry := &SimpleRegistry{
+		make([]*routingTree, 9),
 	}
 
-	if mappingTree.staticRoutes != nil {
-		if _, ok := mappingTree.staticRoutes[path]; ok {
-			return nil
+	registry.createTree(http.MethodGet)
+	registry.createTree(http.MethodHead)
+	registry.createTree(http.MethodPost)
+	registry.createTree(http.MethodPut)
+	registry.createTree(http.MethodPatch)
+	registry.createTree(http.MethodDelete)
+	registry.createTree(http.MethodConnect)
+	registry.createTree(http.MethodOptions)
+	registry.createTree(http.MethodTrace)
+	return registry
+}
+
+func (r *SimpleRegistry) createTree(method http.Method) {
+	r.tree[method.IntValue()] = &routingTree{}
+}
+
+func (r *SimpleRegistry) Handler(ctx http.Context) (http.HandlerChain, bool) {
+	return r.findHandler(ctx)
+}
+
+func (r *SimpleRegistry) Register(mapping Mapping, handler http.Handler) error {
+	methods := mapping.Methods()
+
+	for _, method := range methods {
+		methodTree := r.tree[method.IntValue()]
+
+		if methodTree.children == nil {
+			methodTree.children = &routingNode{}
 		}
+
+		methodTree.add(mapping, nil)
 	}
 
-	chain := mappingTree.getHandlerChain(ctx)
-
-	if chain == nil {
-		return &HandlerChain{}
-	}
-
-	return chain
-}
-
-func (hm *SimpleHandlerRegistry) Handlers() map[*RequestMapping]any {
 	return nil
 }
 
-func (hm *SimpleHandlerRegistry) Register(mapping *RequestMapping, handler Function, middlewares ...*middleware.Middleware) {
-	methods := mapping.Methods()
-	for _, method := range methods {
-		mappingTree := hm.routes[method.IntValue()]
+func (r *SimpleRegistry) Unregister(mapping Mapping) {
 
-		if mappingTree.root == nil {
-			mappingTree.root = &treeNode{}
+}
+
+func (r *SimpleRegistry) findHandler(ctx http.Context) (http.HandlerChain, bool) {
+	var (
+		request = ctx.Request()
+		path    = request.Path()
+		method  = request.Method()
+	)
+
+	methodTree := r.tree[method.IntValue()]
+
+	if methodTree.staticRoutes != nil {
+		if _, ok := methodTree.staticRoutes[path]; ok {
+			return nil, true
+		} else {
+			return nil, false
 		}
-
-		mappingTree.addMapping(mapping, &HandlerChain{value: mapping.pattern,
-			pathVariableNameMap:  map[string]int{},
-			pathVariableIndexMap: map[int]string{},
-		})
 	}
+
+	chain := methodTree.match(ctx)
+	return chain, true
 }
-
-func (hm *SimpleHandlerRegistry) Unregister(mapping *RequestMapping) {
-
-}
-
-*/

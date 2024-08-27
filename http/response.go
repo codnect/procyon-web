@@ -21,7 +21,7 @@ type Response interface {
 	AddHeader(name string, value string)
 	SetHeader(name string, value string)
 	DeleteHeader(name string)
-	Header(name string) string
+	Header(name string) (string, bool)
 	HeaderNames() []string
 	Headers(name string) []string
 	Status() Status

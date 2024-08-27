@@ -1,4 +1,4 @@
-package server
+package web
 
 import (
 	"codnect.io/procyon-web/http"
@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type Context struct {
-	parent   *Context
+type defaultHttpServerContext struct {
+	parent   *defaultHttpServerContext
 	context  context.Context
-	request  Request
-	response Response
+	request  defaultHttpServerRequest
+	response defaultHttpServerResponse
 
 	HandlerChain     http.HandlerChain
 	nextHandlerIndex int
@@ -20,18 +20,12 @@ type Context struct {
 	completed bool
 	aborted   bool
 
-	delegate      RequestDelegate
+	delegate      defaultRequestDelegate
 	pathVariables http.PathVariables
 }
 
-func newServerContext() *Context {
-	return &Context{
-		pathVariables: http.PathVariables{},
-	}
-}
-
-func (c *Context) WithValue(key, val any) http.Context {
-	copyContext := new(Context)
+func (c *defaultHttpServerContext) WithValue(key, val any) http.Context {
+	copyContext := new(defaultHttpServerContext)
 	*copyContext = *c
 
 	ctx := c.context
@@ -43,7 +37,7 @@ func (c *Context) WithValue(key, val any) http.Context {
 	return copyContext
 }
 
-func (c *Context) With(request http.Request, response http.Response) http.Context {
+func (c *defaultHttpServerContext) With(request http.Request, response http.Response) http.Context {
 	if request == nil {
 		panic("nil request")
 	}
@@ -52,10 +46,10 @@ func (c *Context) With(request http.Request, response http.Response) http.Contex
 		panic("nil response")
 	}
 
-	copyContext := new(Context)
+	copyContext := new(defaultHttpServerContext)
 	*copyContext = *c
-	copyContext.request = *(request.(*Request))
-	copyContext.response = *(response.(*Response))
+	copyContext.request = *(request.(*defaultHttpServerRequest))
+	copyContext.response = *(response.(*defaultHttpServerResponse))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -64,14 +58,14 @@ func (c *Context) With(request http.Request, response http.Response) http.Contex
 	return copyContext
 }
 
-func (c *Context) WithRequest(request http.Request) http.Context {
+func (c *defaultHttpServerContext) WithRequest(request http.Request) http.Context {
 	if request == nil {
 		panic("nil request")
 	}
 
-	copyContext := new(Context)
+	copyContext := new(defaultHttpServerContext)
 	*copyContext = *c
-	copyContext.request = *(request.(*Request))
+	copyContext.request = *(request.(*defaultHttpServerRequest))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -80,14 +74,14 @@ func (c *Context) WithRequest(request http.Request) http.Context {
 	return copyContext
 }
 
-func (c *Context) WithResponse(response http.Response) http.Context {
+func (c *defaultHttpServerContext) WithResponse(response http.Response) http.Context {
 	if response == nil {
 		panic("nil response")
 	}
 
-	copyContext := new(Context)
+	copyContext := new(defaultHttpServerContext)
 	*copyContext = *c
-	copyContext.response = *(response.(*Response))
+	copyContext.response = *(response.(*defaultHttpServerResponse))
 
 	if c.parent == nil {
 		copyContext.parent = c
@@ -96,15 +90,15 @@ func (c *Context) WithResponse(response http.Response) http.Context {
 	return copyContext
 }
 
-func (c *Context) Deadline() (deadline time.Time, ok bool) {
+func (c *defaultHttpServerContext) Deadline() (deadline time.Time, ok bool) {
 	return
 }
 
-func (c *Context) Done() <-chan struct{} {
+func (c *defaultHttpServerContext) Done() <-chan struct{} {
 	return nil
 }
 
-func (c *Context) setErr(err error) {
+func (c *defaultHttpServerContext) setErr(err error) {
 	if c.parent != nil {
 		c.parent.setErr(err)
 	} else {
@@ -112,7 +106,7 @@ func (c *Context) setErr(err error) {
 	}
 }
 
-func (c *Context) Err() error {
+func (c *defaultHttpServerContext) Err() error {
 	if c.parent != nil {
 		return c.parent.Err()
 	}
@@ -120,7 +114,7 @@ func (c *Context) Err() error {
 	return c.err
 }
 
-func (c *Context) Value(key any) any {
+func (c *defaultHttpServerContext) Value(key any) any {
 	if key == http.PathVariablesAttribute {
 		return &c.pathVariables
 	}
@@ -132,11 +126,11 @@ func (c *Context) Value(key any) any {
 	return c.context.Value(key)
 }
 
-func (c *Context) Parent() *Context {
+func (c *defaultHttpServerContext) Parent() http.Context {
 	return c.parent
 }
 
-func (c *Context) complete() {
+func (c *defaultHttpServerContext) complete() {
 	if c.parent != nil {
 		c.parent.complete()
 	} else {
@@ -144,7 +138,7 @@ func (c *Context) complete() {
 	}
 }
 
-func (c *Context) IsCompleted() bool {
+func (c *defaultHttpServerContext) IsCompleted() bool {
 	if c.parent != nil {
 		return c.parent.IsCompleted()
 	}
@@ -152,7 +146,7 @@ func (c *Context) IsCompleted() bool {
 	return c.completed
 }
 
-func (c *Context) Abort() {
+func (c *defaultHttpServerContext) Abort() {
 	if c.parent != nil {
 		c.parent.Abort()
 	} else {
@@ -160,7 +154,7 @@ func (c *Context) Abort() {
 	}
 }
 
-func (c *Context) IsAborted() bool {
+func (c *defaultHttpServerContext) IsAborted() bool {
 	if c.parent != nil {
 		return c.parent.IsAborted()
 	}
@@ -168,15 +162,15 @@ func (c *Context) IsAborted() bool {
 	return c.aborted
 }
 
-func (c *Context) Request() http.Request {
+func (c *defaultHttpServerContext) Request() http.Request {
 	return &c.request
 }
 
-func (c *Context) Response() http.Response {
+func (c *defaultHttpServerContext) Response() http.Response {
 	return &c.response
 }
 
-func (c *Context) Reset(req *stdhttp.Request, writer stdhttp.ResponseWriter) {
+func (c *defaultHttpServerContext) Reset(req *stdhttp.Request, writer stdhttp.ResponseWriter) {
 	/*if !c.IsCompleted() {
 		return
 	}*/
@@ -195,7 +189,7 @@ func (c *Context) Reset(req *stdhttp.Request, writer stdhttp.ResponseWriter) {
 	//c.pathVariables.currentIndex = 0
 }
 
-func (c *Context) nextHandler() int {
+func (c *defaultHttpServerContext) nextHandler() int {
 	if c.parent != nil {
 		return c.parent.nextHandler()
 	}
@@ -203,7 +197,7 @@ func (c *Context) nextHandler() int {
 	return c.nextHandlerIndex
 }
 
-func (c *Context) setNextHandler(nextHandler int) {
+func (c *defaultHttpServerContext) setNextHandler(nextHandler int) {
 	if c.parent != nil {
 		c.parent.setNextHandler(nextHandler)
 	} else {
@@ -211,7 +205,7 @@ func (c *Context) setNextHandler(nextHandler int) {
 	}
 }
 
-func (c *Context) Invoke(ctx http.Context) {
+func (c *defaultHttpServerContext) Invoke(ctx http.Context) {
 	if len(c.HandlerChain) == 0 {
 		return
 	}

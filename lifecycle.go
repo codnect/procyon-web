@@ -1,21 +1,23 @@
 package web
 
 import (
-	"codnect.io/procyon-web/http"
+	"codnect.io/procyon-core/runtime"
 	"context"
 )
 
 type serverLifecycle struct {
-	server  http.Server
+	server  runtime.Server
 	running bool
 }
 
-func newServerLifecycle(server http.Server) *serverLifecycle {
-	return &serverLifecycle{}
+func newServerLifecycle(server runtime.Server) *serverLifecycle {
+	return &serverLifecycle{
+		server: server,
+	}
 }
 
 func (l *serverLifecycle) Start(ctx context.Context) error {
-	err := l.server.Start()
+	err := l.server.Start(ctx)
 
 	if err != nil {
 		return err
