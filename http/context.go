@@ -63,6 +63,29 @@ func (c *contextWrapper) Response() Response {
 	return c.responseWrapper
 }
 
+func NewContext(request Request, response Response) Context {
+	if request == nil {
+		panic("nil request")
+	}
+
+	if response == nil {
+		panic("nil response")
+	}
+
+	context := &contextWrapper{
+		requestWrapper: requestWrapper{
+			request: request,
+		},
+		responseWrapper: responseWrapper{
+			response: response,
+		},
+	}
+
+	context.requestWrapper.context = context
+	context.responseWrapper.context = context
+	return context
+}
+
 func WithValue(parent Context, key, val any) Context {
 	if parent == nil {
 		panic("cannot create context from nil parent")
